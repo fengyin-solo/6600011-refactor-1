@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEEGStore } from '../store/eeg';
+import { useStreamStore } from '../store/stream';
 
 const CHANNELS = ['Fp1','Fp2','F3','F4','C3','C4','P3','P4','O1','O2'];
 const CHANNEL_NAMES: Record<string, string> = {
@@ -9,7 +9,8 @@ const CHANNEL_NAMES: Record<string, string> = {
 };
 
 export const ChannelSelector: React.FC = () => {
-  const { selectedChannel, setChannel } = useEEGStore();
+  const selectedChannel = useStreamStore((s) => s.selectedChannel);
+  const setChannel = useStreamStore((s) => s.setChannel);
 
   return (
     <div style={{ padding: '16px' }}>

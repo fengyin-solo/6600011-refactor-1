@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useEEGStore } from '../store/eeg';
+import { useStreamStore } from '../store/stream';
+import { useRecordingStore } from '../store/recording';
+import { usePlaybackStore } from '../store/playback';
 import { Recording } from '../types';
 
 const CHANNEL_NAMES: Record<string, string> = {
@@ -24,23 +26,23 @@ const formatTime = (ms: number): string => {
 };
 
 export const RecordingPanel: React.FC = () => {
-  const {
-    isRecording,
-    currentRecordingFrames,
-    recordings,
-    playbackMode,
-    activeRecording,
-    playbackState,
-    startRecording,
-    stopRecording,
-    deleteRecording,
-    enterPlaybackMode,
-    exitPlaybackMode,
-    setPlaybackTime,
-    togglePlayback,
-    setPlaybackPlaying,
-    selectedChannel,
-  } = useEEGStore();
+  const selectedChannel = useStreamStore((s) => s.selectedChannel);
+  const isRecording = useRecordingStore((s) => s.isRecording);
+  const currentRecordingFrames = useRecordingStore((s) => s.currentRecordingFrames);
+  const recordings = useRecordingStore((s) => s.recordings);
+  const startRecording = useRecordingStore((s) => s.startRecording);
+  const stopRecording = useRecordingStore((s) => s.stopRecording);
+  const deleteRecording = useRecordingStore((s) => s.deleteRecording);
+  const discardCurrentRecording = useRecordingStore((s) => s.discardCurrentRecording);
+
+  const playbackMode = usePlaybackStore((s) => s.playbackMode);
+  const activeRecording = usePlaybackStore((s) => s.activeRecording);
+  const playbackState = usePlaybackStore((s) => s.playbackState);
+  const enterPlaybackMode = usePlaybackStore((s) => s.enterPlaybackMode);
+  const exitPlaybackMode = usePlaybackStore((s) => s.exitPlaybackMode);
+  const setPlaybackTime = usePlaybackStore((s) => s.setPlaybackTime);
+  const togglePlayback = usePlaybackStore((s) => s.togglePlayback);
+  const setPlaybackPlaying = usePlaybackStore((s) => s.setPlaybackPlaying);
 
   const [recordingName, setRecordingName] = useState('');
   const [showNameDialog, setShowNameDialog] = useState(false);
@@ -68,14 +70,14 @@ export const RecordingPanel: React.FC = () => {
   useEffect(() => {
     if (playbackState.isPlaying && activeRecording) {
       playbackTimerRef.current = window.setInterval(() => {
-        const { playbackState, activeRecording, setPlaybackTime, setPlaybackPlaying } = useEEGStore.getState();
-        if (!activeRecording) return;
-        const newTime = playbackState.currentTime + 0.1;
-        if (newTime >= activeRecording.duration) {
-          setPlaybackTime(activeRecording.duration);
-          setPlaybackPlaying(false);
+        const state = usePlaybackStore.getState();
+        if (!state.activeRecording) return;
+        const newTime = state.playbackState.currentTime + 0.1;
+        if (newTime >= state.activeRecording.duration) {
+          state.setPlaybackTime(state.activeRecording.duration);
+          state.setPlaybackPlaying(false);
         } else {
-          setPlaybackTime(newTime);
+          state.setPlaybackTime(newTime);
         }
       }, 100);
     } else {
@@ -104,11 +106,7 @@ export const RecordingPanel: React.FC = () => {
   };
 
   const handleCancelSave = () => {
-    useEEGStore.setState({
-      isRecording: false,
-      recordingStartTime: 0,
-      currentRecordingFrames: [],
-    });
+    discardCurrentRecording();
     setShowNameDialog(false);
     setRecordingName('');
   };

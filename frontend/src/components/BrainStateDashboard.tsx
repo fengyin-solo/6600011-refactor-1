@@ -1,5 +1,6 @@
 import React from 'react';
-import { useEEGStore } from '../store/eeg';
+import { useStreamStore } from '../store/stream';
+import { usePlaybackStore } from '../store/playback';
 
 const CHANNEL_NAMES: Record<string, string> = {
   Fp1: '左前额', Fp2: '右前额', F3: '左额', F4: '右额',
@@ -33,7 +34,11 @@ const ScoreBar: React.FC<{ label: string; value: number; color: string; icon: st
 };
 
 export const BrainStateDashboard: React.FC = () => {
-  const { brainState, selectedChannel, playbackMode, activeRecording, playbackState } = useEEGStore();
+  const brainState = useStreamStore((s) => s.brainState);
+  const selectedChannel = useStreamStore((s) => s.selectedChannel);
+  const playbackMode = usePlaybackStore((s) => s.playbackMode);
+  const activeRecording = usePlaybackStore((s) => s.activeRecording);
+  const playbackState = usePlaybackStore((s) => s.playbackState);
   const channelName = CHANNEL_NAMES[selectedChannel] || selectedChannel;
 
   if (!brainState) {

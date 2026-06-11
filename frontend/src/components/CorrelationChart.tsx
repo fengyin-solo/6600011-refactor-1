@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import { useEEGStore } from '../store/eeg';
+import { useStreamStore } from '../store/stream';
 
 const CHANNEL_NAMES: Record<string, string> = {
   Fp1: '左前额', Fp2: '右前额', F3: '左额', F4: '右额',
@@ -9,7 +9,8 @@ const CHANNEL_NAMES: Record<string, string> = {
 };
 
 export const CorrelationChart: React.FC = () => {
-  const { correlationData, selectedChannel } = useEEGStore();
+  const correlationData = useStreamStore((s) => s.correlationData);
+  const selectedChannel = useStreamStore((s) => s.selectedChannel);
   const channelName = CHANNEL_NAMES[selectedChannel] || selectedChannel;
 
   if (!correlationData) {

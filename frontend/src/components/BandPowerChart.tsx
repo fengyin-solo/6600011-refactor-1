@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { useEEGStore } from '../store/eeg';
+import { useStreamStore } from '../store/stream';
+import { usePlaybackStore } from '../store/playback';
 
 const COLORS = ['#1565c0','#2e7d32','#f9a825','#e53935','#6a1b9a'];
 const LABELS = ['Delta','Theta','Alpha','Beta','Gamma'];
@@ -11,7 +12,9 @@ const CHANNEL_NAMES: Record<string, string> = {
 };
 
 export const BandPowerChart: React.FC = () => {
-  const { bandPower, selectedChannel, playbackMode } = useEEGStore();
+  const bandPower = useStreamStore((s) => s.bandPower);
+  const selectedChannel = useStreamStore((s) => s.selectedChannel);
+  const playbackMode = usePlaybackStore((s) => s.playbackMode);
   const channelName = CHANNEL_NAMES[selectedChannel] || selectedChannel;
 
   if (!bandPower) {
